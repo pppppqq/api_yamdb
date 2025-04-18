@@ -4,6 +4,7 @@ from django.urls import include, path
 from jwt_auth.views import SignUpView, TokenByCodeView
 from users.views import UserViewSet
 
+
 app_name = 'api'
 
 v1_router = DefaultRouter()

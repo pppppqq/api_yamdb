@@ -6,7 +6,7 @@ from django.core.validators import RegexValidator, MaxLengthValidator
 User = get_user_model()
 
 
-class BaseUserSerializer(serializers.ModelSerializer):
+class AdminUserSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(
         validators=[
             MaxLengthValidator(
@@ -62,3 +62,7 @@ class BaseUserSerializer(serializers.ModelSerializer):
                 'Использовать имя "me" в качестве username запрещено.'
             )
         return value
+
+
+class AuthUserSerializer(AdminUserSerializer):
+    role = serializers.ReadOnlyField()

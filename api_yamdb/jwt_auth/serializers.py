@@ -3,13 +3,13 @@ from django.contrib.auth import get_user_model
 from rest_framework.exceptions import NotFound
 from django.core.exceptions import ObjectDoesNotExist
 
-from users.serializers import BaseUserSerializer
+from users.serializers import AdminUserSerializer
 
 
 User = get_user_model()
 
 
-class SignUpSerializer(BaseUserSerializer):
+class SignUpSerializer(AdminUserSerializer):
 
     def validate(self, data):
         email = data['email']
