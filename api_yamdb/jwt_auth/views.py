@@ -13,6 +13,10 @@ User = get_user_model()
 
 
 class SignUpView(APIView):
+    """
+    Регистрирует пользователя и отправляет код подтверждения на email.
+    """
+
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -42,6 +46,10 @@ class SignUpView(APIView):
 
 
 class TokenByCodeView(APIView):
+    """
+    Принимает код подтверждения и выдаёт JWT-токен.
+    """
+
     def post(self, request):
         serializer = TokenByCodeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

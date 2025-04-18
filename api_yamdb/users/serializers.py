@@ -7,6 +7,11 @@ User = get_user_model()
 
 
 class AdminUserSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор для администраторов и суперпользователей с доступом
+    ко всем полям модели пользователя.
+    """
+
     email = serializers.EmailField(
         validators=[
             MaxLengthValidator(
@@ -36,6 +41,9 @@ class AdminUserSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, data):
+        """
+        Проверка уникальности username и email.
+        """
         username = data.get('username')
         email = data.get('email')
 
@@ -57,6 +65,9 @@ class AdminUserSerializer(serializers.ModelSerializer):
         return data
 
     def validate_username(self, value):
+        """
+        Запрещает использовать "me" в качестве username.
+        """
         if value.lower() == 'me':
             raise serializers.ValidationError(
                 'Использовать имя "me" в качестве username запрещено.'
@@ -65,4 +76,8 @@ class AdminUserSerializer(serializers.ModelSerializer):
 
 
 class AuthUserSerializer(AdminUserSerializer):
+    """
+    Сериализатор для обычных пользователей: роль только для чтения.
+    """
+
     role = serializers.ReadOnlyField()

@@ -10,6 +10,11 @@ ROLE_CHOICES = (
 
 
 class CustomUser(AbstractUser):
+    """
+    Кастомная модель пользователя с дополнительными полями: email, bio и роль.
+    Используется для аутентификации, регистрации и управления правами доступа.
+    """
+
     email = models.EmailField(
         verbose_name='email', max_length=254, unique=True
     )

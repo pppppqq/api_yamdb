@@ -10,6 +10,9 @@ User = get_user_model()
 
 
 class SignUpSerializer(AdminUserSerializer):
+    """
+    Сериализатор для регистрации: проверка уникальности email и username.
+    """
 
     def validate(self, data):
         email = data['email']
@@ -32,6 +35,10 @@ class SignUpSerializer(AdminUserSerializer):
 
 
 class TokenByCodeSerializer(serializers.Serializer):
+    """
+    Сериализатор авторизации: принимает username и код подтверждения.
+    """
+
     username = serializers.CharField()
     confirmation_code = serializers.CharField()
 
