@@ -4,7 +4,7 @@ from django.contrib.auth.admin import UserAdmin
 from .models import CustomUser
 
 
-class CustomUserAdmin(UserAdmin):
+class UserAdmin(UserAdmin):
     model = CustomUser
     list_display = ('username', 'email', 'bio', 'role')
     list_editable = ('role',)
@@ -12,4 +12,4 @@ class CustomUserAdmin(UserAdmin):
     list_filter = ('role',)
 
 
-admin.site.register(CustomUser, CustomUserAdmin)
+admin.site.register(CustomUser, UserAdmin)
