@@ -1,7 +1,7 @@
-from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from rest_framework.exceptions import NotFound
 from django.core.exceptions import ObjectDoesNotExist
+from rest_framework import serializers
+from rest_framework.exceptions import NotFound
 
 from users.serializers import AdminUserSerializer
 

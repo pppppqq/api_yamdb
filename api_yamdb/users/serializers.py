@@ -1,6 +1,6 @@
-from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from django.core.validators import RegexValidator, MaxLengthValidator
+from django.core.validators import MaxLengthValidator, RegexValidator
+from rest_framework import serializers
 
 
 User = get_user_model()

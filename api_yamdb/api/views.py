@@ -1,21 +1,18 @@
-from rest_framework import viewsets, filters, permissions
-from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, permissions, viewsets
 from rest_framework.pagination import PageNumberPagination
-from http import HTTPStatus
 
-
-from reviews.models import Category, Genre, Title, Comment, Review
-from .mixins import ReadOnlyOrAdminPermissionMixin
-from .permissions import IsAuthorModeratorAdmin
+from reviews.models import Category, Comment, Genre, Review, Title
 from .filters import TitleFilter
+from .mixins import GenreCategoryMixin, ReadOnlyOrAdminPermissionMixin
+from .permissions import IsAuthorModeratorAdmin
 from .serializers import (
     CategorySerializer,
-    GenreSerializer,
-    TitleSerializer,
     CommentSerializer,
-    ReviewSerializer
+    GenreSerializer,
+    ReviewSerializer,
+    TitleSerializer,
 )
 
 
@@ -37,20 +34,16 @@ class CommentViewSet(viewsets.ModelViewSet):
             review=review
         )
 
-    def perform_update(self, serializer):
-        serializer.save()
-
-    def perform_destroy(self, instance):
-        instance.delete()
-
 
 class ReviewViewSet(viewsets.ModelViewSet):
     """ViewSet для работы с отзывами (Review)."""
 
     serializer_class = ReviewSerializer
     permission_classes = (
-        permissions.IsAuthenticatedOrReadOnly, IsAuthorModeratorAdmin)
-    http_method_names = ['get', 'post', 'patch', 'delete']
+        permissions.IsAuthenticatedOrReadOnly,
+        IsAuthorModeratorAdmin
+    )
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
     def get_queryset(self):
         title_id = self.kwargs.get('title_id')
@@ -59,12 +52,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
         serializer.save(author=self.request.user, title=title)
-
-    def perform_update(self, serializer):
-        serializer.save()
-
-    def perform_destroy(self, instance):
-        instance.delete()
 
 
 class TitleViewSet(ReadOnlyOrAdminPermissionMixin):
@@ -76,34 +63,24 @@ class TitleViewSet(ReadOnlyOrAdminPermissionMixin):
     filterset_class = TitleFilter
     pagination_class = PageNumberPagination
     ordering_fields = ('name', 'year', 'rating')
-    http_method_names = ['get', 'post', 'patch', 'delete']
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
 
-class GenreViewSet(ReadOnlyOrAdminPermissionMixin):
+class GenreViewSet(
+    GenreCategoryMixin,
+    ReadOnlyOrAdminPermissionMixin
+):
     """ViewSet для работы с жанрами (Genre)."""
 
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    lookup_field = 'slug'
-    pagination_class = PageNumberPagination
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
-    http_method_names = ['get', 'post', 'delete']
-
-    def retrieve(self, request, *args, **kwargs):
-        return Response(status=HTTPStatus.METHOD_NOT_ALLOWED)
 
 
-class CategoryViewSet(ReadOnlyOrAdminPermissionMixin):
+class CategoryViewSet(
+    GenreCategoryMixin,
+    ReadOnlyOrAdminPermissionMixin
+):
     """ViewSet для работы с категориями (Category)."""
 
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    lookup_field = 'slug'
-    pagination_class = PageNumberPagination
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
-    http_method_names = ['get', 'post', 'delete']
-
-    def retrieve(self, request, *args, **kwargs):
-        return Response(status=HTTPStatus.METHOD_NOT_ALLOWED)

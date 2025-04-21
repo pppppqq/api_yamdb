@@ -1,6 +1,6 @@
+from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator
 from django.db import models
-from django.contrib.auth import get_user_model
 from django.utils import timezone
 
 from reviews import constants
@@ -92,13 +92,21 @@ class Category(models.Model):
 
 
 class Review(models.Model):
+    """Модель отзывов произведения."""
+
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
         related_name='reviews'
     )
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
-    text = models.TextField('Отзыв', help_text='Введите текст отзыва')
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+    text = models.TextField(
+        'Отзыв',
+        help_text='Введите текст отзыва'
+    )
     score = models.PositiveSmallIntegerField(
         'Оценка',
         help_text='Оцените от 1 до 10'
@@ -113,15 +121,23 @@ class Review(models.Model):
 
 
 class Comment(models.Model):
+    """Модель комментариев произведения."""
+
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='comments'
+        User,
+        on_delete=models.CASCADE,
+        related_name='comments'
     )
     review = models.ForeignKey(
-        Review, on_delete=models.CASCADE, related_name='comments'
+        Review,
+        on_delete=models.CASCADE,
+        related_name='comments'
     )
     text = models.TextField()
     created = models.DateTimeField(
-        'Дата добавления', auto_now_add=True, db_index=True
+        'Дата добавления',
+        auto_now_add=True,
+        db_index=True
     )
 
     class Meta:

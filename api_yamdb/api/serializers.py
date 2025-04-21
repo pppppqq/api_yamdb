@@ -3,18 +3,24 @@ from django.db.models.functions import Round
 from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from rest_framework import serializers
 
-from reviews.models import Comment, Review, Category, Genre, Title
+from reviews.models import Category, Comment, Genre, Review, Title
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    """Сериализатор для модели Comment."""
+
     author = serializers.SlugRelatedField(
         read_only=True,
         slug_field='username'
     )
-    review = serializers.SlugRelatedField(read_only=True, slug_field='id')
-    pub_date = serializers.DateTimeField(source='created', read_only=True)
+    review = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='id'
+    )
+    pub_date = serializers.DateTimeField(
+        source='created',
+        read_only=True)
 
     class Meta:
         model = Comment
@@ -23,6 +29,8 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
+    """Сериализатор для модели Review."""
+
     author = serializers.SlugRelatedField(
         read_only=True,
         slug_field='username'
@@ -34,6 +42,13 @@ class ReviewSerializer(serializers.ModelSerializer):
     score = serializers.IntegerField(min_value=1, max_value=10)
 
     def validate(self, data):
+        """
+        Валидатор на ограничение количества отзывов.
+
+        Пользователь может оставлять только
+        один отзыв к одному произведению.
+        """
+
         request = self.context.get('request')
         if request and request.method == 'POST':
             title_id = self.context.get('view').kwargs.get('title_id')
@@ -84,7 +99,10 @@ class CategorySerializer(serializers.ModelSerializer):
 class TitleSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Title с расчетом рейтинга."""
 
-    genre = GenreSerializer(many=True, read_only=True)
+    genre = GenreSerializer(
+        many=True,
+        read_only=True
+    )
     category = CategorySerializer(read_only=True)
     rating = serializers.SerializerMethodField()
 
@@ -108,7 +126,8 @@ class TitleSerializer(serializers.ModelSerializer):
         model = Title
         fields = (
             'id', 'name', 'year', 'rating',
-            'description', 'genre', 'category')
+            'description', 'genre', 'category'
+        )
         read_only_fields = ('id', 'rating')
 
     def get_rating(self, obj):

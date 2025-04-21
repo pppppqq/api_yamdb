@@ -1,13 +1,13 @@
-from rest_framework.routers import DefaultRouter
 from django.urls import include, path
+from rest_framework.routers import DefaultRouter
 
 from jwt_auth.views import SignUpView, TokenByCodeView
 from users.views import UserViewSet
 from .views import (
-    ReviewViewSet,
-    CommentViewSet,
     CategoryViewSet,
+    CommentViewSet,
     GenreViewSet,
+    ReviewViewSet,
     TitleViewSet,
 )
 

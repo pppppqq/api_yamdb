@@ -1,11 +1,9 @@
 import csv
 import os
 
-import django
+from django.core.management.base import BaseCommand
+from django.conf import settings
 from django.db import transaction
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'api_yamdb.settings')
-django.setup()
 
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
@@ -19,9 +17,9 @@ def import_users(file_path):
                 username=row['username'],
                 email=row['email'],
                 role=row['role'],
-                bio=row['bio'] or None,
-                first_name=row['first_name'] or None,
-                last_name=row['last_name'] or None
+                bio=row['bio'] or '',
+                first_name=row['first_name'] or '',
+                last_name=row['last_name'] or ''
             )
 
 
@@ -87,7 +85,7 @@ def import_comments(file_path):
                 review=review,
                 text=row['text'],
                 author=author,
-                pub_date=row['pub_date']
+                created=row['pub_date']
             )
 
 
@@ -100,37 +98,38 @@ def import_genre_title(file_path):
             title.genre.add(genre)
 
 
-def main():
-    data_path = 'api_yamdb/static/data/'
+class Command(BaseCommand):
+    help = 'Импортирует данные из CSV-файлов в базу данных'
 
-    try:
-        with transaction.atomic():
-            print("Импорт пользователей...")
-            import_users(os.path.join(data_path, 'users.csv'))
+    def handle(self, *args, **options):
+        data_path = os.path.join(settings.BASE_DIR, 'static', 'data')
 
-            print("Импорт категорий...")
-            import_categories(os.path.join(data_path, 'category.csv'))
+        try:
+            with transaction.atomic():
+                self.stdout.write('Импорт пользователей...')
+                import_users(os.path.join(data_path, 'users.csv'))
 
-            print("Импорт жанров...")
-            import_genres(os.path.join(data_path, 'genre.csv'))
+                self.stdout.write('Импорт категорий...')
+                import_categories(os.path.join(data_path, 'category.csv'))
 
-            print("Импорт произведений...")
-            import_titles(os.path.join(data_path, 'titles.csv'))
+                self.stdout.write('Импорт жанров...')
+                import_genres(os.path.join(data_path, 'genre.csv'))
 
-            print("Импорт связей жанров...")
-            import_genre_title(os.path.join(data_path, 'genre_title.csv'))
+                self.stdout.write('Импорт произведений...')
+                import_titles(os.path.join(data_path, 'titles.csv'))
 
-            print("Импорт отзывов...")
-            import_reviews(os.path.join(data_path, 'review.csv'))
+                self.stdout.write('Импорт связей жанров...')
+                import_genre_title(os.path.join(data_path, 'genre_title.csv'))
 
-            print("Импорт комментариев...")
-            import_comments(os.path.join(data_path, 'comments.csv'))
+                self.stdout.write('Импорт отзывов...')
+                import_reviews(os.path.join(data_path, 'review.csv'))
 
-        print("Все данные успешно импортированы!")
+                self.stdout.write('Импорт комментариев...')
+                import_comments(os.path.join(data_path, 'comments.csv'))
 
-    except Exception as e:
-        print(f"Ошибка при импорте: {str(e)}")
+            self.stdout.write(
+                self.style.SUCCESS('Все данные успешно импортированы!')
+            )
 
-
-if __name__ == '__main__':
-    main()
+        except Exception as e:
+            self.stderr.write(self.style.ERROR(f'Ошибка при импорте: {e}'))
