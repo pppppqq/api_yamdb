@@ -1,7 +1,10 @@
+from rest_framework import viewsets, filters, permissions, mixins
+from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, filters, permissions
-from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.pagination import PageNumberPagination
+from http import HTTPStatus
+
 
 from reviews.models import Category, Genre, Title, Comment, Review
 from .mixins import ReadOnlyOrAdminPermissionMixin
@@ -17,18 +20,21 @@ from .serializers import (
 
 
 class CommentViewSet(viewsets.ModelViewSet):
+    """ViewSet для работы с комментариями (Comment)."""
+
     serializer_class = CommentSerializer
     permission_classes = (
-        permissions.IsAuthenticatedOrReadOnly, IsAuthorModeratorAdmin
-    )
+        permissions.IsAuthenticatedOrReadOnly, IsAuthorModeratorAdmin)
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_queryset(self):
-        return Comment.objects.filter(review_id=self.kwargs['title_id'])
+        return Comment.objects.filter(review_id=self.kwargs['review_id'])
 
     def perform_create(self, serializer):
+        review = get_object_or_404(Review, id=self.kwargs['review_id'])
         serializer.save(
             author=self.request.user,
-            review_id=self.kwargs['review_id']
+            review=review
         )
 
     def perform_update(self, serializer):
@@ -39,10 +45,12 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
+    """ViewSet для работы с отзывами (Review)."""
+
     serializer_class = ReviewSerializer
     permission_classes = (
-        permissions.IsAuthenticatedOrReadOnly, IsAuthorModeratorAdmin
-    )
+        permissions.IsAuthenticatedOrReadOnly, IsAuthorModeratorAdmin)
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_queryset(self):
         title_id = self.kwargs.get('title_id')
@@ -68,6 +76,7 @@ class TitleViewSet(ReadOnlyOrAdminPermissionMixin):
     filterset_class = TitleFilter
     pagination_class = PageNumberPagination
     ordering_fields = ('name', 'year', 'rating')
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
 
 class GenreViewSet(ReadOnlyOrAdminPermissionMixin):
@@ -79,6 +88,10 @@ class GenreViewSet(ReadOnlyOrAdminPermissionMixin):
     pagination_class = PageNumberPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
+    http_method_names = ['get', 'post', 'delete']
+
+    def retrieve(self, request, *args, **kwargs):
+        return Response(status=HTTPStatus.METHOD_NOT_ALLOWED)
 
 
 class CategoryViewSet(ReadOnlyOrAdminPermissionMixin):
@@ -90,3 +103,7 @@ class CategoryViewSet(ReadOnlyOrAdminPermissionMixin):
     pagination_class = PageNumberPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
+    http_method_names = ['get', 'post', 'delete']
+
+    def retrieve(self, request, *args, **kwargs):
+        return Response(status=HTTPStatus.METHOD_NOT_ALLOWED)
