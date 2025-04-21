@@ -29,3 +29,90 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
         fields = ('id', 'text', 'author', 'title', 'score', 'pub_date')
         read_only_fields = ('author', 'title')
+from django.db.models import Avg
+from django.db.models.functions import Round
+from django.utils import timezone
+from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
+
+from reviews.models import Category, Genre, Title
+
+
+class GenreSerializer(serializers.ModelSerializer):
+    """Сериализатор для модели Genre."""
+
+    class Meta:
+        model = Genre
+        fields = ('name', 'slug')
+
+    def validate_slug(self, value):
+        """Проверяет уникальность slug жанра."""
+
+        if Genre.objects.filter(slug=value).exists():
+            raise ValidationError('Жанр с таким slug уже существует.')
+        return value
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    """Сериализатор для модели Category."""
+
+    class Meta:
+        model = Category
+        fields = ('name', 'slug')
+
+    def validate_slug(self, value):
+        """Проверяет уникальность slug категории."""
+
+        if Category.objects.filter(slug=value).exists():
+            raise ValidationError('Категория с таким slug уже существует.')
+        return value
+
+
+class TitleSerializer(serializers.ModelSerializer):
+    """Сериализатор для модели Title с расчетом рейтинга."""
+
+    genre = GenreSerializer(many=True, read_only=True)
+    category = CategorySerializer(read_only=True)
+    rating = serializers.SerializerMethodField()
+    genre_slugs = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Genre.objects.all(),
+        many=True,
+        write_only=True,
+        source='genre',
+        required=True,
+        help_text="Список slug'ов жанров"
+    )
+    category_slug = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Category.objects.all(),
+        write_only=True,
+        source='category',
+        required=True,
+        help_text="Slug категории"
+    )
+
+    class Meta:
+        model = Title
+        fields = (
+            'id', 'name', 'year', 'rating', 'description',
+            'genre', 'category', 'genre_slugs', 'category_slug'
+        )
+        read_only_fields = ('id', 'rating')
+
+    def get_rating(self, obj):
+        """Вычисляет средний рейтинг на основе отзывов"""
+        result = obj.reviews.aggregate(
+            rating=Round(Avg('score'))
+        )
+        return int(result['rating']) if result['rating'] is not None else None
+
+    def validate_year(self, value):
+        """Проверяет, что год выпуска не больше текущего"""
+        current_year = timezone.now().year
+        if value > current_year:
+            raise serializers.ValidationError(
+                f'Год выпуска ({value}) не может быть больше текущего'
+                f'({current_year})'
+            )
+        return value
