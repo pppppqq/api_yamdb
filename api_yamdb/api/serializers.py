@@ -73,20 +73,19 @@ class TitleSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
     rating = serializers.SerializerMethodField()
-    genre_slugs = serializers.SlugRelatedField(
+
+    genre = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Genre.objects.all(),
         many=True,
-        write_only=True,
-        source='genre',
+        write_only=False,
         required=True,
         help_text="Список slug'ов жанров"
     )
-    category_slug = serializers.SlugRelatedField(
+    category = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Category.objects.all(),
-        write_only=True,
-        source='category',
+        write_only=False,
         required=True,
         help_text="Slug категории"
     )
@@ -94,9 +93,8 @@ class TitleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Title
         fields = (
-            'id', 'name', 'year', 'rating', 'description',
-            'genre', 'category', 'genre_slugs', 'category_slug'
-        )
+            'id', 'name', 'year', 'rating',
+            'description', 'genre', 'category')
         read_only_fields = ('id', 'rating')
 
     def get_rating(self, obj):
@@ -115,3 +113,13 @@ class TitleSerializer(serializers.ModelSerializer):
                 f'({current_year})'
             )
         return value
+
+    def to_representation(self, instance):
+        """Кастомизация вывода для GET-запросов."""
+        data = super().to_representation(instance)
+        if not self.context.get('writing', False):
+            data['genre'] = GenreSerializer(
+                instance.genre.all(), many=True
+            ).data
+            data['category'] = CategorySerializer(instance.category).data
+        return data

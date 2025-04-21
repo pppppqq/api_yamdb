@@ -1,7 +1,9 @@
-from rest_framework import viewsets, filters, permissions
+from rest_framework import viewsets, filters, permissions, mixins
+from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
+from http import HTTPStatus
 
 
 from api.serializers import CommentSerializer, ReviewSerializer
@@ -63,6 +65,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     filterset_class = TitleFilter
     pagination_class = PageNumberPagination
     ordering_fields = ('name', 'year', 'rating')
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
 
 class GenreViewSet(viewsets.ModelViewSet):
@@ -75,6 +78,10 @@ class GenreViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
+    http_method_names = ['get', 'post', 'delete']
+
+    def retrieve(self, request, *args, **kwargs):
+        return Response(status=HTTPStatus.METHOD_NOT_ALLOWED)
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -87,3 +94,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
+    http_method_names = ['get', 'post', 'delete']
+
+    def retrieve(self, request, *args, **kwargs):
+        return Response(status=HTTPStatus.METHOD_NOT_ALLOWED)
