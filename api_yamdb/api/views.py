@@ -15,17 +15,21 @@ from .serializers import CategorySerializer, GenreSerializer, TitleSerializer
 
 
 class CommentViewSet(viewsets.ModelViewSet):
+    """ViewSet для работы с комментариями (Comment)."""
+
     serializer_class = CommentSerializer
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly, IsAuthorModeratorAdmin)
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_queryset(self):
-        return Comment.objects.filter(review_id=self.kwargs['title_id'])
+        return Comment.objects.filter(review_id=self.kwargs['review_id'])
 
     def perform_create(self, serializer):
+        review = get_object_or_404(Review, id=self.kwargs['review_id'])
         serializer.save(
             author=self.request.user,
-            review_id=self.kwargs['review_id']
+            review=review
         )
 
     def perform_update(self, serializer):
@@ -36,9 +40,12 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
+    """ViewSet для работы с отзывами (Review)."""
+
     serializer_class = ReviewSerializer
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly, IsAuthorModeratorAdmin)
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_queryset(self):
         title_id = self.kwargs.get('title_id')
