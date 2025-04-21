@@ -13,14 +13,14 @@ class AdminUserSerializer(serializers.ModelSerializer):
     """
 
     email = serializers.EmailField(
-        validators=[
+        validators=(
             MaxLengthValidator(
                 254,
                 message='Email должен быть не длиннее 254 символов.'),
-        ]
+        )
     )
     username = serializers.CharField(
-        validators=[
+        validators=(
             RegexValidator(
                 regex=r'^[\w.@+-]+\Z',
                 message=(
@@ -31,7 +31,7 @@ class AdminUserSerializer(serializers.ModelSerializer):
                 150,
                 message='Username должен быть не длиннее 150 символов.'
             )
-        ]
+        )
     )
 
     class Meta:

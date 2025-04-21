@@ -18,7 +18,7 @@ class Title(models.Model):
     )
     year = models.PositiveIntegerField(
         'Год выпуска',
-        validators=[MaxValueValidator(timezone.now().year)],
+        validators=(MaxValueValidator(timezone.now().year),),
         db_index=True
     )
     description = models.TextField(
@@ -41,7 +41,7 @@ class Title(models.Model):
     class Meta:
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
-        ordering = ['-year', 'name']
+        ordering = ('-year', 'name')
 
     def __str__(self):
         return f'{self.name} ({self.year})'
@@ -63,7 +63,7 @@ class Genre(models.Model):
     class Meta:
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
-        ordering = ['name']
+        ordering = ('name',)
 
     def __str__(self):
         return self.name
@@ -85,7 +85,7 @@ class Category(models.Model):
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
-        ordering = ['name']
+        ordering = ('name',)
 
     def __str__(self):
         return self.name
@@ -117,7 +117,7 @@ class Review(models.Model):
         unique_together = ('title', 'author')
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
-        ordering = ['-pub_date']
+        ordering = ('-pub_date',)
 
 
 class Comment(models.Model):
@@ -143,4 +143,4 @@ class Comment(models.Model):
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
-        ordering = ['-created']
+        ordering = ('-created',)

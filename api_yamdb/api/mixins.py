@@ -10,6 +10,7 @@ from .permissions import IsAdminOrSuperuser
 
 class ReadOnlyOrAdminPermissionMixin(viewsets.ModelViewSet):
     """Миксин прав доступа."""
+
     def get_permissions(self):
         if self.request.method in SAFE_METHODS:
             return (permissions.AllowAny(),)
@@ -18,6 +19,7 @@ class ReadOnlyOrAdminPermissionMixin(viewsets.ModelViewSet):
 
 class GenreCategoryMixin(viewsets.ModelViewSet):
     """Миксин для моделей жанра и категории"""
+
     lookup_field = 'slug'
     pagination_class = PageNumberPagination
     filter_backends = (filters.SearchFilter,)

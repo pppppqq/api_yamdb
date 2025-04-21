@@ -22,7 +22,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly, IsAuthorModeratorAdmin)
-    http_method_names = ['get', 'post', 'patch', 'delete']
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
     def get_queryset(self):
         return Comment.objects.filter(review_id=self.kwargs['review_id'])
