@@ -1,11 +1,12 @@
-from rest_framework import viewsets, filters
+from rest_framework import viewsets, filters, permissions
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
 
 
 from api.serializers import CommentSerializer, ReviewSerializer
-from .permissions import IsAuthorOrModeratorOrAdminOrReadOnly, IsAdminOrSuperuser
+from .permissions import (
+    IsAuthorModeratorAdmin, IsAdminOrSuperuserOrReadOnly)
 from reviews.models import Category, Genre, Title, Comment, Review
 from .filters import TitleFilter
 from .serializers import CategorySerializer, GenreSerializer, TitleSerializer
@@ -13,7 +14,8 @@ from .serializers import CategorySerializer, GenreSerializer, TitleSerializer
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (IsAuthorOrModeratorOrAdminOrReadOnly,)
+    permission_classes = (
+        permissions.IsAuthenticatedOrReadOnly, IsAuthorModeratorAdmin)
 
     def get_queryset(self):
         return Comment.objects.filter(review_id=self.kwargs['title_id'])
@@ -33,7 +35,8 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (IsAuthorOrModeratorOrAdminOrReadOnly,)
+    permission_classes = (
+        permissions.IsAuthenticatedOrReadOnly, IsAuthorModeratorAdmin)
 
     def get_queryset(self):
         title_id = self.kwargs.get('title_id')
@@ -55,7 +58,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    permission_classes = [IsAdminOrSuperuser]
+    permission_classes = (IsAdminOrSuperuserOrReadOnly,)
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     filterset_class = TitleFilter
     pagination_class = PageNumberPagination
@@ -67,7 +70,7 @@ class GenreViewSet(viewsets.ModelViewSet):
 
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = [IsAdminOrSuperuser]
+    permission_classes = (IsAdminOrSuperuserOrReadOnly,)
     lookup_field = 'slug'
     pagination_class = PageNumberPagination
     filter_backends = (filters.SearchFilter,)
@@ -79,7 +82,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = [IsAdminOrSuperuser]
+    permission_classes = (IsAdminOrSuperuserOrReadOnly,)
     lookup_field = 'slug'
     pagination_class = PageNumberPagination
     filter_backends = (filters.SearchFilter,)
