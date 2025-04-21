@@ -32,6 +32,7 @@ class CustomUser(AbstractUser):
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
+        ordering = ('username',)
 
     def save(self, *args, **kwargs):
         if self._state.adding and self.is_superuser:
