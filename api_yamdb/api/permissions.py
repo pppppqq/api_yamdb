@@ -14,29 +14,10 @@ class IsAdminOrSuperuser(permissions.BasePermission):
         )
 
 
-class IsAdminOrSuperuserOrReadOnly(permissions.BasePermission):
-    """
-    Разрешает:
-    - SAFE_METHODS (GET, HEAD, OPTIONS) всем.
-    - Остальные методы (POST, PUT, DELETE) только админам/суперпользователям.
-    """
-    def has_permission(self, request, view):
-        if request.method in permissions.SAFE_METHODS:
-            return True
-        return (
-            request.user.is_authenticated
-            and (request.user.is_superuser or request.user.role == 'admin')
-        )
-
-    def has_object_permission(self, request, view, obj):
-        return self.has_permission(request, view)
-
-
 class IsAuthorModeratorAdmin(permissions.BasePermission):
     """
-    Читать могут все.
-    Писать — аутентифицированные.
-    Редактировать и удалять — автор или модератор или админ.
+    Изменение и удаление разрешено только автору объекта,
+    модератору или администратору.
     """
 
     def has_object_permission(self, request, view, obj):

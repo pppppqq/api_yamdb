@@ -1,11 +1,10 @@
 from django.contrib.auth import get_user_model
 from rest_framework.decorators import action
 
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, filters
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
-from django_filters.rest_framework import DjangoFilterBackend
 
 from .serializers import AdminUserSerializer, AuthUserSerializer
 from api.permissions import IsAdminOrSuperuser
@@ -31,8 +30,8 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = 'username'
 
     pagination_class = PageNumberPagination
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('username',)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('username',)
 
     def get_permissions(self):
         """
