@@ -24,6 +24,8 @@ INSTALLED_APPS = [
     'jwt_auth.apps.JwtAuthConfig',
     'users.apps.UsersConfig',
     'api.apps.ApiConfig',
+    'reviews.apps.ReviewsConfig',
+    'api.apps.ApiConfig',
 ]
 
 REST_FRAMEWORK = {
