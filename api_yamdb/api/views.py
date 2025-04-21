@@ -5,7 +5,7 @@ from rest_framework.pagination import PageNumberPagination
 
 
 from api.serializers import CommentSerializer, ReviewSerializer
-from .permissions import IsAuthorOrModeratorOrAdminOrReadOnly, AdminPermissions
+from .permissions import IsAuthorOrModeratorOrAdminOrReadOnly, IsAdminOrSuperuser
 from reviews.models import Category, Genre, Title, Comment, Review
 from .filters import TitleFilter
 from .serializers import CategorySerializer, GenreSerializer, TitleSerializer
@@ -55,7 +55,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    permission_classes = [AdminPermissions]
+    permission_classes = [IsAdminOrSuperuser]
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     filterset_class = TitleFilter
     pagination_class = PageNumberPagination
@@ -67,7 +67,7 @@ class GenreViewSet(viewsets.ModelViewSet):
 
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = [AdminPermissions]
+    permission_classes = [IsAdminOrSuperuser]
     lookup_field = 'slug'
     pagination_class = PageNumberPagination
     filter_backends = (filters.SearchFilter,)
@@ -79,7 +79,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = [AdminPermissions]
+    permission_classes = [IsAdminOrSuperuser]
     lookup_field = 'slug'
     pagination_class = PageNumberPagination
     filter_backends = (filters.SearchFilter,)

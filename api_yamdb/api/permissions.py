@@ -1,12 +1,14 @@
 from rest_framework import permissions
 
 
-class AdminPermissions(permissions.BasePermission):
-    """Кастомный класс доступа."""
+class IsAdminOrSuperuser(permissions.BasePermission):
+    """
+    Разрешение, которое проверяет, является ли пользователь админом
+    или суперпользователем.
+    """
+
     def has_permission(self, request, view):
-        if view.action in ('create', 'update', 'partial_update', 'destroy'):
-            return request.user.is_authenticated and request.user.is_staff
-        return True
+        return request.user.is_superuser or request.user.role == 'admin'
 
 
 class IsAuthorOrModeratorOrAdminOrReadOnly(permissions.BasePermission):
@@ -27,6 +29,7 @@ class IsAuthorOrModeratorOrAdminOrReadOnly(permissions.BasePermission):
 
         return (
             obj.author == request.user
+            # Анонимный юзер вообще не записан в бд!
             or getattr(request.user, 'role', None) in ('moderator', 'admin')
-            or request.user.is_staff
+            or request.user.is_superuser
         )

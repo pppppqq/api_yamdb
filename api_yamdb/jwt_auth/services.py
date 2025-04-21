@@ -35,7 +35,7 @@ class ConfirmationCodeService:
         Генерирует и отправляет код подтверждения пользователю.
         """
         code = cls.generate_code(user)
-        cls.send_confirmation_code_email()(user, code)
+        cls.send_confirmation_code_email(user, code)
         return code
 
     @staticmethod
