@@ -1,12 +1,14 @@
-from rest_framework import viewsets
-# permissions, status,
-#  from rest_framework.exceptions import PermissionDenied
+from rest_framework import viewsets, filters
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.pagination import PageNumberPagination
 
 
 from api.serializers import CommentSerializer, ReviewSerializer
-from .permissions import IsAuthorOrModeratorOrAdminOrReadOnly
-from reviews.models import Comment, Review
+from .permissions import IsAuthorOrModeratorOrAdminOrReadOnly, AdminPermissions
+from reviews.models import Category, Genre, Title, Comment, Review
+from .filters import TitleFilter
+from .serializers import CategorySerializer, GenreSerializer, TitleSerializer
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -46,14 +48,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def perform_destroy(self, instance):
         instance.delete()
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, viewsets
-from rest_framework.pagination import PageNumberPagination
-
-from reviews.models import Category, Genre, Title
-from .filters import TitleFilter
-from .permissions import AdminPermissions
-from .serializers import CategorySerializer, GenreSerializer, TitleSerializer
 
 
 class TitleViewSet(viewsets.ModelViewSet):

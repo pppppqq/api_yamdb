@@ -1,5 +1,11 @@
+from django.db.models import Avg
+from django.db.models.functions import Round
+from django.utils import timezone
 from rest_framework import serializers
-from reviews.models import Comment, Review
+from rest_framework.exceptions import ValidationError
+from rest_framework import serializers
+
+from reviews.models import Comment, Review, Category, Genre, Title
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -29,13 +35,6 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
         fields = ('id', 'text', 'author', 'title', 'score', 'pub_date')
         read_only_fields = ('author', 'title')
-from django.db.models import Avg
-from django.db.models.functions import Round
-from django.utils import timezone
-from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
-
-from reviews.models import Category, Genre, Title
 
 
 class GenreSerializer(serializers.ModelSerializer):

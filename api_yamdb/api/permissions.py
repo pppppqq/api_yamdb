@@ -7,7 +7,6 @@ class AdminPermissions(permissions.BasePermission):
         if view.action in ('create', 'update', 'partial_update', 'destroy'):
             return request.user.is_authenticated and request.user.is_staff
         return True
-from rest_framework import permissions
 
 
 class IsAuthorOrModeratorOrAdminOrReadOnly(permissions.BasePermission):
