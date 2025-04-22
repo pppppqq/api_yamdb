@@ -6,7 +6,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 
 from api.validators import validate_username_not_me
-
+from reviews.constants import MAX_NAME_LENGTH, MAX_EMAIL_LENGTH
 
 User = get_user_model()
 
@@ -18,7 +18,7 @@ class UsernameEmailSerializer(serializers.Serializer):
     """Сериализатор для регистрации пользователя."""
 
     username = serializers.CharField(
-        max_length=150,
+        max_length=MAX_NAME_LENGTH,
         required=True,
         validators=(UnicodeUsernameValidator(), validate_username_not_me),
         help_text=(
@@ -27,7 +27,7 @@ class UsernameEmailSerializer(serializers.Serializer):
         )
     )
     email = serializers.EmailField(
-        max_length=254,
+        max_length=MAX_EMAIL_LENGTH,
         required=True,
         validators=(EmailValidator(),),
         help_text='Обязательное поле. Не более 254 символов.'
@@ -59,7 +59,7 @@ class TokenByCodeSerializer(serializers.Serializer):
     """
 
     username = serializers.CharField(
-        max_length=150,
+        max_length=MAX_NAME_LENGTH,
         required=True,
         validators=(UnicodeUsernameValidator(), validate_username_not_me),
         help_text=(

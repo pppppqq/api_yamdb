@@ -28,50 +28,35 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     lookup_field = 'username'
 
+    permission_classes = (IsAuthenticated, IsAdminOrSuperuser)
+    serializer_class = AdminUserSerializer
+
     pagination_class = PageNumberPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
 
-    def get_permissions(self):
-        """
-        Возвращает права доступа в зависимости от действия.
-        Для /me/ — только авторизованные пользователи.
-        Для остальных — админы или суперпользователи.
-        """
-        if self.action == 'me':
-            return (IsAuthenticated(),)
-        return (IsAuthenticated(), IsAdminOrSuperuser())
-
-    def get_serializer_class(self):
-        """
-        Возвращает сериализатор в зависимости от действия.
-        Для /me/ — AuthUserSerializer.
-        Для остальных — AdminUserSerializer.
-        """
-        if self.action == 'me':
-            return AuthUserSerializer
-        return AdminUserSerializer
-
-    @action(detail=False, methods=('get', 'patch', 'delete'))
+    @action(
+        detail=False,
+        methods=('get', 'patch'),
+        permission_classes=(IsAuthenticated,),
+        serializer_class=AuthUserSerializer
+    )
     def me(self, request, *args, **kwargs):
         """
         Эндпоинт /users/me/ для работы с собственным профилем пользователя.
 
         GET — получение данных текущего пользователя.
         PATCH — частичное обновление данных.
-        DELETE — метод не поддерживается.
         """
         if request.method == 'GET':
             serializer = self.get_serializer(request.user)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
-        elif request.method == 'PATCH':
-            serializer = self.get_serializer(
-                request.user,
-                data=request.data,
-                partial=True
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        serializer = self.get_serializer(
+            request.user,
+            data=request.data,
+            partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
