@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import AccessToken
 
-from .serializers import SignUpSerializer, TokenByCodeSerializer
+from .serializers import UsernameEmailSerializer, TokenByCodeSerializer
 from .services import ConfirmationCodeService
 
 
@@ -17,7 +17,7 @@ class SignUpView(APIView):
     """
 
     def post(self, request):
-        serializer = SignUpSerializer(data=request.data)
+        serializer = UsernameEmailSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         email = serializer.validated_data['email']
@@ -50,7 +50,7 @@ class TokenByCodeView(APIView):
 
         if not ConfirmationCodeService.validate_code(username, code):
             raise serializers.ValidationError(
-                {'Ошибка': 'Неверный код подтверждения.'}
+                {'confirmation_code': 'Неверный код подтверждения.'}
             )
 
         access = AccessToken.for_user(username)
