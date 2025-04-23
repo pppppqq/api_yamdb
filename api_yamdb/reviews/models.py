@@ -1,9 +1,8 @@
 from django.contrib.auth import get_user_model
-from django.core.validators import MaxValueValidator
 from django.db import models
-from django.utils import timezone
 
 from reviews import constants
+from .validators import validate_year
 
 User = get_user_model()
 
@@ -16,9 +15,9 @@ class Title(models.Model):
         max_length=constants.MAX_LENGTH,
         db_index=True
     )
-    year = models.PositiveIntegerField(
+    year = models.SmallIntegerField(
         'Год выпуска',
-        validators=(MaxValueValidator(timezone.now().year),),
+        validators=(validate_year,),
         db_index=True
     )
     description = models.TextField(
@@ -28,7 +27,7 @@ class Title(models.Model):
     )
     genre = models.ManyToManyField(
         'Genre',
-        verbose_name='Жанр',
+        verbose_name='Жанры',
         related_name='titles'
     )
     category = models.ForeignKey(
@@ -44,7 +43,7 @@ class Title(models.Model):
         ordering = ('-year', 'name')
 
     def __str__(self):
-        return f'{self.name} ({self.year})'
+        return f'Произведение: "{self.name}" (год: {self.year})'
 
 
 class Genre(models.Model):
@@ -55,9 +54,8 @@ class Genre(models.Model):
         max_length=constants.MAX_LENGTH
     )
     slug = models.SlugField(
-        'Slug',
-        unique=True,
-        max_length=constants.LENGTH_SLUG
+        'Идентификатор (slug)',
+        unique=True
     )
 
     class Meta:
@@ -66,7 +64,7 @@ class Genre(models.Model):
         ordering = ('name',)
 
     def __str__(self):
-        return self.name
+        return f'Жанр: {self.name}'
 
 
 class Category(models.Model):
@@ -77,9 +75,8 @@ class Category(models.Model):
         max_length=constants.MAX_LENGTH
     )
     slug = models.SlugField(
-        'Slug',
-        unique=True,
-        max_length=constants.LENGTH_SLUG
+        'Идентификатор (slug)',
+        unique=True
     )
 
     class Meta:
@@ -88,7 +85,7 @@ class Category(models.Model):
         ordering = ('name',)
 
     def __str__(self):
-        return self.name
+        return f'Категория: {self.name}'
 
 
 class Review(models.Model):
