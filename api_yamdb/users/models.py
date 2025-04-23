@@ -3,7 +3,7 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 
 from reviews.constants import MAX_NAME_LENGTH, MAX_LENGTH
-from api.validators import validate_username_not_me
+from api.v1.validators import validate_username_not_me
 
 
 class CustomUser(AbstractUser):
@@ -18,7 +18,7 @@ class CustomUser(AbstractUser):
         ADMIN = 'admin', 'Администратор'
 
     username = models.CharField(
-        verbose_name='Никнейм',
+        verbose_name='Username',
         max_length=MAX_NAME_LENGTH,
         unique=True,
         validators=(
