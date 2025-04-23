@@ -122,7 +122,7 @@ class Review(models.Model):
         ordering = ('-pub_date',)
 
     def __str__(self):
-        return self.name
+        return f'Отзыв: {self.name}'
 
 
 class Comment(models.Model):
@@ -151,4 +151,4 @@ class Comment(models.Model):
         ordering = ('-created',)
 
     def __str__(self):
-        return self.name
+        return f'Комментарий: {self.name}'
