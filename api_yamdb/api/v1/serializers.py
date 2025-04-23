@@ -104,17 +104,13 @@ class CommentSerializer(serializers.ModelSerializer):
         read_only=True,
         slug_field='username'
     )
-    review = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='id'
-    )
     pub_date = serializers.DateTimeField(
         source='created',
         read_only=True)
 
     class Meta:
         model = Comment
-        fields = ('id', 'text', 'author', 'review', 'pub_date')
+        fields = ('id', 'text', 'author', 'pub_date')
         read_only_fields = ('author', 'review', 'pub_date')
 
 
@@ -124,10 +120,6 @@ class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         read_only=True,
         slug_field='username'
-    )
-    title = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='name'
     )
     score = serializers.IntegerField(min_value=1, max_value=10)
 
@@ -152,7 +144,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        fields = ('id', 'text', 'author', 'title', 'score', 'pub_date')
+        fields = ('id', 'text', 'author', 'score', 'pub_date')
         read_only_fields = ('author', 'title')
 
 

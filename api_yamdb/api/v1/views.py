@@ -141,11 +141,19 @@ class CommentViewSet(viewsets.ModelViewSet):
         permissions.IsAuthenticatedOrReadOnly, IsAuthorModeratorAdmin)
     http_method_names = ('get', 'post', 'patch', 'delete')
 
+    def get_review(self):
+        return get_object_or_404(
+            Review,
+            id=self.kwargs['review_id'],
+            title_id=self.kwargs['title_id']
+        )
+
     def get_queryset(self):
-        return Comment.objects.filter(review_id=self.kwargs['review_id'])
+        review = self.get_review()
+        return review.comments.all()
 
     def perform_create(self, serializer):
-        review = get_object_or_404(Review, id=self.kwargs['review_id'])
+        review = self.get_review()
         serializer.save(
             author=self.request.user,
             review=review
@@ -162,12 +170,15 @@ class ReviewViewSet(viewsets.ModelViewSet):
     )
     http_method_names = ('get', 'post', 'patch', 'delete')
 
+    def get_title(self):
+        return get_object_or_404(Title, id=self.kwargs['title_id'])
+
     def get_queryset(self):
-        title_id = self.kwargs.get('title_id')
-        return Review.objects.filter(title_id=title_id)
+        title = self.get_title()
+        return title.reviews.all()
 
     def perform_create(self, serializer):
-        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
+        title = self.get_title()
         serializer.save(author=self.request.user, title=title)
 
 
