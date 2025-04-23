@@ -1,12 +1,12 @@
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.validators import EmailValidator
-from rest_framework import filters, mixins, permissions, viewsets, serializers
+from rest_framework import filters, mixins, permissions, serializers, viewsets
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import SAFE_METHODS
 
+from reviews.constants import MAX_EMAIL_LENGTH, MAX_NAME_LENGTH
 from .permissions import IsAdminOrSuperuser
 from .validators import validate_username_not_me
-from reviews.constants import MAX_NAME_LENGTH, MAX_EMAIL_LENGTH
 
 
 class ReadOnlyOrAdminPermissionMixin:

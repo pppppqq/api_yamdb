@@ -1,7 +1,8 @@
-from django.contrib.auth import get_user_model
 from django.db.models import Avg
 from django.db.models.functions import Round
 from django.shortcuts import get_object_or_404
+from django.contrib.auth import get_user_model
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, permissions, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
@@ -9,9 +10,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import AccessToken
-from django_filters.rest_framework import DjangoFilterBackend
 
-from reviews.models import Category, Comment, Genre, Review, Title
+from reviews.models import Category, Genre, Review, Title
 from .filters import TitleFilter
 from .mixins import GenreCategoryMixin, ReadOnlyOrAdminPermissionMixin
 from .permissions import IsAdminOrSuperuser, IsAuthorModeratorAdmin
@@ -25,7 +25,7 @@ from .serializers import (
     TitleReadSerializer,
     TitleWriteSerializer,
     TokenByCodeSerializer,
-    SignUpSerializer
+    SignUpSerializer,
 )
 from .services import ConfirmationCodeService
 

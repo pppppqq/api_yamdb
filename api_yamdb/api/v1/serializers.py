@@ -2,16 +2,15 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, ValidationError
 
+from reviews.constants import MAX_NAME_LENGTH
+from reviews.models import Category, Comment, Genre, Review, Title
+from .mixins import UsernameEmailMixin
 from .validators import (
     validate_username_not_me,
     validate_unique_username_email
 )
-from .mixins import UsernameEmailMixin
-from reviews.constants import MAX_NAME_LENGTH
-from reviews.models import Category, Comment, Genre, Review, Title
 
 
 User = get_user_model()
