@@ -55,7 +55,7 @@ class CustomUser(AbstractUser):
     @property
     def is_admin(self):
         """Проверяет, является ли пользователь администратором."""
-        return self.is_superuser or self.role == self.RoleChoises.ADMIN
+        return self.role == self.RoleChoises.ADMIN
 
     @property
     def is_moderator(self):
