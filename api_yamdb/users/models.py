@@ -2,8 +2,8 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 
+from .validators import validate_username_is_allowed
 from reviews.constants import MAX_NAME_LENGTH, MAX_LENGTH
-from api.v1.validators import validate_username_not_me
 
 
 class CustomUser(AbstractUser):
@@ -23,7 +23,7 @@ class CustomUser(AbstractUser):
         unique=True,
         validators=(
             UnicodeUsernameValidator(),
-            validate_username_not_me
+            validate_username_is_allowed
         )
     )
     email = models.EmailField(
@@ -55,7 +55,7 @@ class CustomUser(AbstractUser):
     @property
     def is_admin(self):
         """Проверяет, является ли пользователь администратором."""
-        return self.role == self.RoleChoises.ADMIN
+        return self.is_superuser or self.role == self.RoleChoises.ADMIN
 
     @property
     def is_moderator(self):
