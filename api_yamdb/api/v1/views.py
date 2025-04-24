@@ -1,4 +1,3 @@
-from django.contrib.auth import get_user_model
 from django.db.models import Avg
 from django.db.models.functions import Round
 from django.shortcuts import get_object_or_404
@@ -11,6 +10,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import AccessToken
 from django_filters.rest_framework import DjangoFilterBackend
 
+from users.models import CustomUser
 from reviews.models import Category, Genre, Review, Title
 from .filters import TitleFilter
 from .mixins import GenreCategoryMixin, ReadOnlyOrAdminPermissionMixin
@@ -30,9 +30,6 @@ from .serializers import (
 from .services import ConfirmationCodeService
 
 
-User = get_user_model()
-
-
 class SignUpView(APIView):
     """
     Регистрирует пользователя и отправляет код подтверждения на email.
@@ -45,7 +42,7 @@ class SignUpView(APIView):
         email = serializer.validated_data['email']
         username = serializer.validated_data['username']
 
-        user, _ = User.objects.get_or_create(
+        user, _ = CustomUser.objects.get_or_create(
             email=email,
             defaults={'username': username}
         )
@@ -70,12 +67,14 @@ class TokenByCodeView(APIView):
         username = serializer.validated_data['username']
         code = serializer.validated_data['confirmation_code']
 
+        user = get_object_or_404(CustomUser, username=username)
+
         if not ConfirmationCodeService.validate_code(username, code):
             raise serializers.ValidationError({
                 'confirmation_code': ['Неверный код подтверждения.']
             })
 
-        access = AccessToken.for_user(username)
+        access = AccessToken.for_user(user)
 
         return Response(
             {'token': str(access)},
@@ -96,7 +95,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     http_method_names = ('get', 'post', 'patch', 'delete')
 
-    queryset = User.objects.all()
+    queryset = CustomUser.objects.all()
     lookup_field = 'username'
 
     permission_classes = (IsAuthenticated, IsAdminOrSuperuser)

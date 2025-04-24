@@ -1,30 +1,48 @@
-from django.contrib.auth import get_user_model
 from django.contrib.auth.validators import UnicodeUsernameValidator
-from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from rest_framework.exceptions import NotFound
 
-from .validators import (
-    validate_username_not_me,
-    validate_unique_username_email
-)
-from .mixins import UsernameEmailMixin
-from reviews.constants import MAX_NAME_LENGTH
+from users.models import CustomUser
+from users.validators import validate_username_is_allowed
+from reviews.constants import MAX_NAME_LENGTH, MAX_EMAIL_LENGTH
 from reviews.models import Category, Comment, Genre, Review, Title
 
 
-User = get_user_model()
-
-
-class SignUpSerializer(UsernameEmailMixin, serializers.Serializer):
+class SignUpSerializer(serializers.Serializer):
     """Сериализатор для регистрации пользователя."""
 
-    def validate(self, data):
-        validate_unique_username_email(
-            username=data.get('username'),
-            email=data.get('email')
+    username = serializers.CharField(
+        max_length=MAX_NAME_LENGTH,
+        required=True,
+        validators=(UnicodeUsernameValidator(), validate_username_is_allowed),
+        help_text=(
+            'Обязательное поле. Не более 150 символов. '
+            'Только буквы, цифры и @/./+/-/_'
         )
+    )
+    email = serializers.EmailField(
+        max_length=MAX_EMAIL_LENGTH,
+        required=True,
+        help_text='Обязательное поле. Не более 254 символов.'
+    )
+
+    def validate(self, data):
+        username = data.get('username')
+        email = data.get('email')
+
+        errors = {}
+
+        user_by_email = CustomUser.objects.filter(email=email).first()
+        user_by_username = CustomUser.objects.filter(username=username).first()
+
+        if user_by_email != user_by_username:
+            if user_by_email:
+                errors['email'] = 'Этот email уже занят.'
+            if user_by_username:
+                errors['username'] = 'Этот username уже занят.'
+
+        if errors:
+            raise ValidationError(errors)
         return data
 
 
@@ -36,7 +54,7 @@ class TokenByCodeSerializer(serializers.Serializer):
     username = serializers.CharField(
         max_length=MAX_NAME_LENGTH,
         required=True,
-        validators=(UnicodeUsernameValidator(), validate_username_not_me),
+        validators=(UnicodeUsernameValidator(), validate_username_is_allowed),
         help_text=(
             'Обязательное поле. Не более 150 символов. '
             'Только буквы, цифры и @/./+/-/_'
@@ -47,21 +65,15 @@ class TokenByCodeSerializer(serializers.Serializer):
         help_text='Код подтверждения для аутентификации.'
     )
 
-    def validate_username(self, value):
-        try:
-            return User.objects.get(username=value)
-        except ObjectDoesNotExist:
-            raise NotFound(detail={'username': ['Пользователь не найден.']})
 
-
-class AdminUserSerializer(UsernameEmailMixin, serializers.ModelSerializer):
+class AdminUserSerializer(serializers.ModelSerializer):
     """
     Сериализатор для администраторов и суперпользователей с доступом
     ко всем полям модели пользователя.
     """
 
     class Meta:
-        model = User
+        model = CustomUser
         fields = (
             'username',
             'email',
@@ -71,13 +83,6 @@ class AdminUserSerializer(UsernameEmailMixin, serializers.ModelSerializer):
             'role'
         )
 
-    def validate(self, data):
-        validate_unique_username_email(
-            username=data.get('username'),
-            email=data.get('email')
-        )
-        return data
-
 
 class AuthUserSerializer(serializers.ModelSerializer):
     """
@@ -85,7 +90,7 @@ class AuthUserSerializer(serializers.ModelSerializer):
     """
 
     class Meta:
-        model = User
+        model = CustomUser
         fields = (
             'username',
             'email',
