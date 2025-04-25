@@ -36,16 +36,21 @@ class SignUpView(APIView):
     """
 
     def post(self, request):
-        serializer = SignUpSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        email = request.data.get('email')
+        username = request.data.get('username')
 
-        email = serializer.validated_data['email']
-        username = serializer.validated_data['username']
-
-        user, _ = CustomUser.objects.get_or_create(
+        user = CustomUser.objects.filter(
             email=email,
-            defaults={'username': username}
-        )
+            username=username
+        ).first()
+
+        if not user:
+            serializer = SignUpSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            user = CustomUser.objects.create_user(
+                email=email,
+                username=username
+            )
 
         ConfirmationCodeService.generate_and_send_code(user)
 
